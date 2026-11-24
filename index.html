@@ -2,115 +2,289 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوت الأرباح</title>
-    <script src="https://telegram.org"></script>
-    <style>
-        body {
-            background: linear-gradient(180deg, #2d1b4e 0%, #1a102e 100%);
-            color: white;
-            font-family: system-ui, -apple-system, sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
-        }
-        .card {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 25px;
-            width: 100%;
-            max-width: 380px;
-            text-align: center;
-            margin-top: 20px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-        .balance-title { font-size: 14px; color: #b8a8d8; }
-        .balance-amount { font-size: 38px; font-weight: bold; margin: 10px 0; color: #fff; }
-        .btn-watch {
-            background: #ffffff;
-            color: #2d1b4e;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            width: 100%;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: 0.2s;
-        }
-        .btn-watch:active { transform: scale(0.96); }
-        .btn-withdraw {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 15px;
-            width: 100%;
-            margin-top: 10px;
-            cursor: pointer;
-        }
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-            font-size: 13px;
-            color: #d1c4e9;
-            background: rgba(0,0,0,0.2);
-            padding: 12px;
-            border-radius: 12px;
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AdReward USDT</title>
+        <script src="https://telegram.org/js/telegram-web-app.js"></script>
+ <style>
+        * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
+        body { background-color: #130f26; color: #ffffff; padding: 16px; display: flex; flex-direction: column; gap: 14px; min-height: 100vh; }
+        .card { background: #1e183b; border-radius: 18px; padding: 20px; text-align: center; border: 1px solid #2f2659; }
+        .balance-title { font-size: 13px; color: #a598c9; margin-bottom: 6px; }
+        .balance-amount { font-size: 36px; font-weight: 800; color: #00e676; margin-bottom: 18px; letter-spacing: 0.5px; }
+        button { width: 100%; border: none; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        button:disabled { opacity: 0.55; cursor: not-allowed; }
+        .btn-watch { background: #ffffff; color: #130f26; margin-bottom: 10px; }
+        .btn-withdraw { background: #2c2452; color: #d5cce8; margin-bottom: 16px; }
+        .stats { display: flex; justify-content: space-between; font-size: 13px; color: #a598c9; border-top: 1px solid #2f2659; padding-top: 12px; }
+        .stats b { color: #ffffff; }
+        .ref-card { background: #1e183b; border-radius: 16px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #2f2659; gap: 10px; }
+        .ref-title { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+        .ref-sub { font-size: 11px; color: #a598c9; }
+        .btn-invite { width: auto; padding: 10px 14px; background: #00e676; color: #130f26; font-size: 12px; white-space: nowrap; }
+        .btn-advertise-main { background: linear-gradient(135deg, #6c47ff, #4c28d9); color: #ffffff; }
+        .ad-viewer { display: none; position: fixed; inset: 0; background: #0d0a1a; z-index: 100; flex-direction: column; justify-content: space-between; padding: 20px; text-align: center; }
+        .ad-top-bar { display: flex; justify-content: space-between; align-items: center; }
+        .ad-timer-badge { background: #2c2452; padding: 6px 12px; border-radius: 20px; font-size: 12px; color: #ffd740; font-weight: 700; }
+        .btn-close-ad { display: none; width: auto; padding: 8px 14px; background: #00e676; color: #130f26; font-size: 13px; }
+        .ad-body { background: #1e183b; padding: 30px 20px; border-radius: 20px; border: 1px solid #3c3173; }
+        .ad-body h2 { font-size: 20px; margin-bottom: 10px; color: #ffffff; }
+        .ad-body p { font-size: 14px; color: #b8a8d8; margin-bottom: 20px; line-height: 1.5; }
+        .btn-visit-ad { display: inline-block; background: #6c47ff; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; align-items: center; justify-content: center; padding: 16px; }
+        .modal-content { background: #1e183b; width: 100%; max-width: 400px; border-radius: 20px; padding: 20px; border: 1px solid #3c3173; max-height: 90vh; overflow-y: auto; }
+        .modal-content h3 { margin-bottom: 14px; font-size: 17px; text-align: center; }
+        .input-group { margin-bottom: 12px; text-align: right; }
+        .input-group label { display: block; font-size: 12px; color: #a598c9; margin-bottom: 5px; }
+        .input-group input, .input-group select { width: 100%; padding: 11px; border-radius: 10px; border: 1px solid #3c3173; background: #130f26; color: #fff; font-size: 13px; }
+        .wallet-box { background: #130f26; padding: 10px; border-radius: 10px; border: 1px dashed #00e676; margin: 10px 0; text-align: center; }
+        .wallet-addr { font-size: 11px; color: #00e676; word-break: break-all; margin-bottom: 8px; font-family: monospace; }
+        .btn-copy-wallet { background: #2c2452; color: #fff; padding: 8px; font-size: 12px; }
+        .modal-actions { display: flex; gap: 8px; margin-top: 14px; }
+        .btn-cancel { background: #3b2d5e; color: #fff; }
+        .btn-confirm { background: #00e676; color: #130f26; }
     </style>
 </head>
 <body>
-
     <div class="card">
-        <div class="balance-title">رصيدك الحالي (GRAM)</div>
+        <div class="balance-title">رصيدك الحالي (USDT)</div>
         <div class="balance-amount" id="balance">0.0000</div>
-        
-        <button class="btn-watch" onclick="watchAd()">▶ شاهد إعلان (+0.0050)</button>
-        <button class="btn-withdraw" onclick="withdraw()">↑ سحب الأرباح</button>
-
+        <button class="btn-watch" id="watchBtn" onclick="watchAd()">▶ شاهد إعلان (+0.0003)</button>
+        <button class="btn-withdraw" onclick="openWithdrawModal()">↑ سحب الأرباح (USDT)</button>
         <div class="stats">
-            <span>إعلانات اليوم: <b id="adsCount">0</b>/20</span>
-            <span>قيمة الإعلان: <b>0.0050</b></span>
+            <span>إعلانات اليوم: <b id="adsCount">0</b>/25</span>
+            <span>قيمة الإعلان: <b>0.0003</b></span>
+        </div>
+    </div>
+    <div class="ref-card">
+        <div class="ref-info">
+            <div class="ref-title">👥 إحالاتك: <span id="refCount">0</span> / 1</div>
+            <div class="ref-sub">شرط السحب: دعوة صديق واحد على الأقل</div>
+        </div>
+        <button class="btn-invite" onclick="copyInviteLink()">📋 رابط الدعوة</button>
+    </div>
+    <button class="btn-advertise-main" onclick="openAdModal()">📢 أعلن لقناتك أو بوتك هنا (USDT) 💵</button>
+    <div class="ad-viewer" id="adViewer">
+        <div class="ad-top-bar">
+            <span style="font-size: 12px; color: #b8a8d8;">إعلان ممول 💵</span>
+            <div class="ad-timer-badge" id="timerText">انتظر 10 ثوانٍ...</div>
+            <button class="btn-close-ad" id="closeAdBtn" onclick="claimAdReward()">استلم المكافأة ✕</button>
+        </div>
+        <div class="ad-body">
+            <div style="font-size: 40px; margin-bottom: 10px;">📢</div>
+            <h2 id="viewAdTitle">مساحة إعلانية مميزة</h2>
+            <p id="viewAdDesc">احجز إعلانك الآن بعملة USDT ليظهر بملء الشاشة أمام جميع مستخدمي البوت!</p>
+            <a href="https://t.me" target="_blank" id="viewAdLink" class="btn-visit-ad">فتح القناة / البوت ↗</a>
+        </div>
+        <div style="font-size: 12px; color: #8b7aa8;">ستحصل على 0.0003 USDT بعد انتهاء العداد</div>
+    </div>
+
+    <div class="modal" id="adModal">
+        <div class="modal-content">
+            <h3>📢 انشر إعلانك بعملة USDT</h3>
+            <div class="input-group">
+                <label>اسم القناة أو البوت (العنوان)</label>
+                <input type="text" id="inputTitle" placeholder="مثال: قناة أخبار التقنية" maxlength="35">
+            </div>
+            <div class="input-group">
+                <label>وصف قصير للإعلان</label>
+                <input type="text" id="inputDesc" placeholder="اشترك الآن واحصل على أحدث العروض" maxlength="80">
+            </div>
+            <div class="input-group">
+                <label>رابط القناة أو البوت</label>
+                <input type="url" id="inputUrl" placeholder="https://t.me">
+            </div>
+            <div class="input-group">
+                <label>اختر الباقة الإعلانية</label>
+                <select id="inputPlan">
+                    <option value="24 ساعة - 2 USDT">24 ساعة — 2 USDT</option>
+                    <option value="3 أيام - 5 USDT">3 أيام — 5 USDT</option>
+                    <option value="7 أيام - 10 USDT">7 أيام — 10 USDT</option>
+                </select>
+            </div>
+            <div class="wallet-box">
+                <div style="font-size: 11px; color: #a598c9; margin-bottom: 4px;">حوّل قيمة الباقة إلى عنوان محفظة TON التالي:</div>
+                <div class="wallet-addr" id="walletAddr">UQDA9WTztjpVRm68qLDSLfz5_QiwYm-5wSVk2WrSGr2qxxYz</div>
+                <button type="button" class="btn-copy-wallet" onclick="copyWallet()">📋 نسخ عنوان المحفظة</button>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeAdModal()">إلغاء</button>
+                <button type="button" class="btn-confirm" onclick="submitUsdtAd()">تأكيد الطلب</button>
+            </div>
         </div>
     </div>
 
+    <div class="modal" id="withdrawModal">
+        <div class="modal-content">
+            <h3>↑ سحب الأرباح (USDT)</h3>
+            <p style="font-size: 12px; color: #a598c9; margin-bottom: 12px; text-align: center;">الحد الأدنى للسحب: 0.10 USDT + دعوة صديق واحد</p>
+            <div class="input-group">
+                <label>عنوان محفظة USDT (شبكة TON / BEP20)</label>
+                <input type="text" id="userWalletInput" placeholder="أدخل عنوان محفظتك هنا">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeWithdrawModal()">إلغاء</button>
+                <button type="button" class="btn-confirm" onclick="processWithdraw()">إرسال طلب السحب</button>
+            </div>
+        </div>
+    </div>
     <script>
-        if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
+        const tg = window.Telegram ? window.Telegram.WebApp : null;
+        if (tg) { tg.expand(); tg.ready(); }
+
+        const REWARD_PER_AD = 0.0003;
+        const MAX_DAILY_ADS = 25;
+        const MIN_WITHDRAW = 0.10;
+        const REQUIRED_REFERRALS = 1;
+        const COOLDOWN_SECONDS = 10;
+
+        let balance = parseFloat(localStorage.getItem("usdt_balance")) || 0;
+        let adsToday = parseInt(localStorage.getItem("usdt_ads_today")) || 0;
+        let refCount = parseInt(localStorage.getItem("usdt_refs")) || 0;
+        let lastDate = localStorage.getItem("usdt_last_date") || new Date().toDateString();
+
+        if (lastDate !== new Date().toDateString()) {
+            adsToday = 0;
+            localStorage.setItem("usdt_ads_today", 0);
+            localStorage.setItem("usdt_last_date", new Date().toDateString());
         }
 
-        let balance = 0.0000;
-        let adsCount = 0;
+        let currentAd = {
+            title: "مساحة إعلانية مميزة",
+            desc: "احجز إعلانك الآن بعملة USDT ليظهر بملء الشاشة أمام جميع مستخدمي البوت!",
+            url: "https://t.me"
+        };
+
+        let cooldownTimer = null;
+        let isCooldown = false;
+
+        function updateUI() {
+            document.getElementById("balance").innerText = balance.toFixed(4);
+            document.getElementById("adsCount").innerText = adsToday;
+            document.getElementById("refCount").innerText = refCount;
+        }
 
         function watchAd() {
-            if (adsCount >= 20) {
-                alert("وصلت للحد الأقصى من الإعلانات اليوم! عد غداً.");
+            if (isCooldown) return;
+            if (adsToday >= MAX_DAILY_ADS) {
+                alert("لقد وصلت للحد الأقصى للإعلانات اليومية (" + MAX_DAILY_ADS + " إعلان). عد غداً!");
                 return;
             }
-            alert("جاري تشغيل الإعلان... (هنا سيظهر الإعلان الحقيقي لاحقاً)");
-            balance += 0.0050;
-            adsCount += 1;
-            document.getElementById("balance").innerText = balance.toFixed(4);
-            document.getElementById("adsCount").innerText = adsCount;
+            document.getElementById("viewAdTitle").innerText = currentAd.title;
+            document.getElementById("viewAdDesc").innerText = currentAd.desc;
+            document.getElementById("viewAdLink").href = currentAd.url;
+
+            const viewer = document.getElementById("adViewer");
+            const timerText = document.getElementById("timerText");
+            const closeBtn = document.getElementById("closeAdBtn");
+
+            viewer.style.display = "flex";
+            closeBtn.style.display = "none";
+            timerText.style.display = "block";
+
+            let timeLeft = 10;
+            timerText.innerText = "انتظر " + timeLeft + " ثوانٍ...";
+
+            const adInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft > 0) {
+                    timerText.innerText = "انتظر " + timeLeft + " ثوانٍ...";
+                } else {
+                    clearInterval(adInterval);
+                    timerText.style.display = "none";
+                    closeBtn.style.display = "block";
+                }
+            }, 1000);
         }
 
-        function withdraw() {
-            if (balance < 0.5) {
-                alert("الحد الأدنى للسحب هو 0.5000 GRAM");
-            } else {
-                alert("تم إرسال طلب السحب بنجاح!");
+        function claimAdReward() {
+            document.getElementById("adViewer").style.display = "none";
+            balance += REWARD_PER_AD;
+            adsToday += 1;
+            localStorage.setItem("usdt_balance", balance.toFixed(4));
+            localStorage.setItem("usdt_ads_today", adsToday);
+            updateUI();
+            startCooldown();
+        }
+
+        function startCooldown() {
+            isCooldown = true;
+            const watchBtn = document.getElementById("watchBtn");
+            watchBtn.disabled = true;
+            let wait = COOLDOWN_SECONDS;
+            watchBtn.innerText = "⏳ انتظر " + wait + " ثوانٍ للإعلان التالي...";
+
+            cooldownTimer = setInterval(() => {
+                wait--;
+                if (wait > 0) {
+                    watchBtn.innerText = "⏳ انتظر " + wait + " ثوانٍ للإعلان التالي...";
+                } else {
+                    clearInterval(cooldownTimer);
+                    isCooldown = false;
+                    watchBtn.disabled = false;
+                    watchBtn.innerText = "▶ شاهد إعلان (+0.0003)";
+                }
+            }, 1000);
+        }
+
+        function openWithdrawModal() { document.getElementById("withdrawModal").style.display = "flex"; }
+        function closeWithdrawModal() { document.getElementById("withdrawModal").style.display = "none"; }
+
+        function processWithdraw() {
+            const wallet = document.getElementById("userWalletInput").value.trim();
+            if (balance < MIN_WITHDRAW) {
+                alert("الحد الأدنى للسحب هو " + MIN_WITHDRAW + " USDT. رصيدك الحالي: " + balance.toFixed(4));
+                return;
             }
+            if (refCount < REQUIRED_REFERRALS) {
+                alert("يجب دعوة صديق واحد (" + REQUIRED_REFERRALS + ") على الأقل عبر رابط الدعوة الخاص بك لتفعيل السحب!");
+                return;
+            }
+            if (!wallet) {
+                alert("يرجى إدخال عنوان محفظتك أولاً.");
+                return;
+            }
+            alert("تم استيفاء جميع الشروط وإرسال طلب سحب " + balance.toFixed(4) + " USDT بنجاح!");
+            balance = 0;
+            localStorage.setItem("usdt_balance", "0");
+            updateUI();
+            closeWithdrawModal();
         }
-    </script>
 
+        function copyInviteLink() {
+            let userId = "user";
+            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                userId = tg.initDataUnsafe.user.id;
+            }
+            const inviteUrl = "https://t.me?start=" + userId;
+            navigator.clipboard.writeText(inviteUrl);
+            alert("تم نسخ رابط الدعوة الخاص بك!\n" + inviteUrl);
+        }
+
+        function openAdModal() { document.getElementById("adModal").style.display = "flex"; }
+        function closeAdModal() { document.getElementById("adModal").style.display = "none"; }
+
+        function copyWallet() {
+            const addr = document.getElementById("walletAddr").innerText;
+            navigator.clipboard.writeText(addr);
+            alert("تم نسخ عنوان المحفظة بنجاح!");
+        }
+
+        function submitUsdtAd() {
+            const title = document.getElementById("inputTitle").value.trim();
+            const desc = document.getElementById("inputDesc").value.trim();
+            const url = document.getElementById("inputUrl").value.trim();
+            const plan = document.getElementById("inputPlan").value;
+
+            if (!title || !desc || !url) {
+                alert("يرجى ملء جميع بيانات الإعلان أولاً.");
+                return;
+            }
+            currentAd = { title: title, desc: desc, url: url };
+            closeAdModal();
+            alert("تم استلام طلب إعلانك (" + plan + ")! سيتم تفعيله فور تأكيد التحويل.");
+        }
+
+        updateUI();
+    </script>
 </body>
 </html>
