@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوت الأرباح</title>
+    <script src="https://telegram.org"></script>
+    <style>
+        body {
+            background: linear-gradient(180deg, #2d1b4e 0%, #1a102e 100%);
+            color: white;
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 25px;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .balance-title { font-size: 14px; color: #b8a8d8; }
+        .balance-amount { font-size: 38px; font-weight: bold; margin: 10px 0; color: #fff; }
+        .btn-watch {
+            background: #ffffff;
+            color: #2d1b4e;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: 0.2s;
+        }
+        .btn-watch:active { transform: scale(0.96); }
+        .btn-withdraw {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 15px;
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #d1c4e9;
+            background: rgba(0,0,0,0.2);
+            padding: 12px;
+            border-radius: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="balance-title">رصيدك الحالي (GRAM)</div>
+        <div class="balance-amount" id="balance">0.0000</div>
+        
+        <button class="btn-watch" onclick="watchAd()">▶ شاهد إعلان (+0.0050)</button>
+        <button class="btn-withdraw" onclick="withdraw()">↑ سحب الأرباح</button>
+
+        <div class="stats">
+            <span>إعلانات اليوم: <b id="adsCount">0</b>/20</span>
+            <span>قيمة الإعلان: <b>0.0050</b></span>
+        </div>
+    </div>
+
+    <script>
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+
+        let balance = 0.0000;
+        let adsCount = 0;
+
+        function watchAd() {
+            if (adsCount >= 20) {
+                alert("وصلت للحد الأقصى من الإعلانات اليوم! عد غداً.");
+                return;
+            }
+            alert("جاري تشغيل الإعلان... (هنا سيظهر الإعلان الحقيقي لاحقاً)");
+            balance += 0.0050;
+            adsCount += 1;
+            document.getElementById("balance").innerText = balance.toFixed(4);
+            document.getElementById("adsCount").innerText = adsCount;
+        }
+
+        function withdraw() {
+            if (balance < 0.5) {
+                alert("الحد الأدنى للسحب هو 0.5000 GRAM");
+            } else {
+                alert("تم إرسال طلب السحب بنجاح!");
+            }
+        }
+    </script>
+
+</body>
+</html>
