@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AdReward USDT</title>
-        <script src="https://telegram.org/js/telegram-web-app.js"></script>
- <style>
+    <script src="https://telegram.org"></script>
+    <script src="https://adsgram.ai"></script>
+    <style>
         * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; margin: 0; padding: 0; }
         body { background-color: #130f26; color: #ffffff; padding: 16px; display: flex; flex-direction: column; gap: 14px; min-height: 100vh; }
         .card { background: #1e183b; border-radius: 18px; padding: 20px; text-align: center; border: 1px solid #2f2659; }
@@ -49,7 +50,7 @@
         <div class="balance-title">رصيدك الحالي (USDT)</div>
         <div class="balance-amount" id="balance">0.0000</div>
         <button class="btn-watch" id="watchBtn" onclick="watchAd()">▶ شاهد إعلان (+0.0003)</button>
-        <button class="btn-withdraw" onclick="openWithdrawModal()">↑ سحب الأرباح (USDT)</button>
+        <button class="btn-withdraw" onclick="openWithdrawModal()">↑ سحب الأرباح (USDT - TON)</button>
         <div class="stats">
             <span>إعلانات اليوم: <b id="adsCount">0</b>/25</span>
             <span>قيمة الإعلان: <b>0.0003</b></span>
@@ -57,12 +58,13 @@
     </div>
     <div class="ref-card">
         <div class="ref-info">
-            <div class="ref-title">👥 إحالاتك: <span id="refCount">0</span> / 1</div>
-            <div class="ref-sub">شرط السحب: دعوة صديق واحد على الأقل</div>
+            <div class="ref-title">👥 دعوة الأصدقاء</div>
+            <div class="ref-sub">شارك رابط الدعوة لزيادة أرباح المجتمع</div>
         </div>
         <button class="btn-invite" onclick="copyInviteLink()">📋 رابط الدعوة</button>
     </div>
     <button class="btn-advertise-main" onclick="openAdModal()">📢 أعلن لقناتك أو بوتك هنا (USDT) 💵</button>
+
     <div class="ad-viewer" id="adViewer">
         <div class="ad-top-bar">
             <span style="font-size: 12px; color: #b8a8d8;">إعلان ممول 💵</span>
@@ -91,7 +93,7 @@
             </div>
             <div class="input-group">
                 <label>رابط القناة أو البوت</label>
-                <input type="url" id="inputUrl" placeholder="https://t.me">
+                <input type="url" id="inputUrl" placeholder="https://t.me...">
             </div>
             <div class="input-group">
                 <label>اختر الباقة الإعلانية</label>
@@ -108,18 +110,18 @@
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn-cancel" onclick="closeAdModal()">إلغاء</button>
-                <button type="button" class="btn-confirm" onclick="submitUsdtAd()">تأكيد الطلب</button>
+                <button type="button" class="btn-confirm" onclick="submitUsdtAd()">تأكيد وإرسال الطلب</button>
             </div>
         </div>
     </div>
 
     <div class="modal" id="withdrawModal">
         <div class="modal-content">
-            <h3>↑ سحب الأرباح (USDT)</h3>
-            <p style="font-size: 12px; color: #a598c9; margin-bottom: 12px; text-align: center;">الحد الأدنى للسحب: 0.10 USDT + دعوة صديق واحد</p>
+            <h3>↑ سحب الأرباح (USDT - TON)</h3>
+            <p style="font-size: 12px; color: #a598c9; margin-bottom: 12px; text-align: center;">الحد الأدنى للسحب: 0.10 USDT — شبكة TON فقط</p>
             <div class="input-group">
-                <label>عنوان محفظة USDT (شبكة TON / BEP20)</label>
-                <input type="text" id="userWalletInput" placeholder="أدخل عنوان محفظتك هنا">
+                <label>عنوان محفظة TON الخاصة بك (يبدأ بـ UQ أو EQ)</label>
+                <input type="text" id="userWalletInput" placeholder="مثال: UQDA9WTztjpVRm68..." maxlength="48">
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn-cancel" onclick="closeWithdrawModal()">إلغاء</button>
@@ -131,15 +133,16 @@
         const tg = window.Telegram ? window.Telegram.WebApp : null;
         if (tg) { tg.expand(); tg.ready(); }
 
+        const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "61674" }) : null;
+
+        const ADMIN_USERNAME = "Dyfar1";
         const REWARD_PER_AD = 0.0003;
         const MAX_DAILY_ADS = 25;
         const MIN_WITHDRAW = 0.10;
-        const REQUIRED_REFERRALS = 1;
         const COOLDOWN_SECONDS = 10;
 
         let balance = parseFloat(localStorage.getItem("usdt_balance")) || 0;
         let adsToday = parseInt(localStorage.getItem("usdt_ads_today")) || 0;
-        let refCount = parseInt(localStorage.getItem("usdt_refs")) || 0;
         let lastDate = localStorage.getItem("usdt_last_date") || new Date().toDateString();
 
         if (lastDate !== new Date().toDateString()) {
@@ -160,7 +163,44 @@
         function updateUI() {
             document.getElementById("balance").innerText = balance.toFixed(4);
             document.getElementById("adsCount").innerText = adsToday;
-            document.getElementById("refCount").innerText = refCount;
+        }
+
+        function copyTextSafely(text, successMessage) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert(successMessage);
+                }).catch(() => {
+                    fallbackCopy(text, successMessage);
+                });
+            } else {
+                fallbackCopy(text, successMessage);
+            }
+        }
+
+        function fallbackCopy(text, successMessage) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand("copy");
+                alert(successMessage);
+            } catch (err) {
+                alert("تعذر النسخ التلقائي، يرجى النسخ يدوياً:\n" + text);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        function sendToAdmin(messageText) {
+            const url = "https://t.me" + ADMIN_USERNAME + "?text=" + encodeURIComponent(messageText);
+            if (tg && tg.openTelegramLink) {
+                tg.openTelegramLink(url);
+            } else {
+                window.open(url, "_blank");
+            }
         }
 
         function watchAd() {
@@ -169,6 +209,19 @@
                 alert("لقد وصلت للحد الأقصى للإعلانات اليومية (" + MAX_DAILY_ADS + " إعلان). عد غداً!");
                 return;
             }
+
+            if (AdController) {
+                AdController.show().then(() => {
+                    claimAdReward();
+                }).catch(() => {
+                    showFallbackAd();
+                });
+            } else {
+                showFallbackAd();
+            }
+        }
+
+        function showFallbackAd() {
             document.getElementById("viewAdTitle").innerText = currentAd.title;
             document.getElementById("viewAdDesc").innerText = currentAd.desc;
             document.getElementById("viewAdLink").href = currentAd.url;
@@ -229,25 +282,37 @@
         function openWithdrawModal() { document.getElementById("withdrawModal").style.display = "flex"; }
         function closeWithdrawModal() { document.getElementById("withdrawModal").style.display = "none"; }
 
+        function isValidTonAddress(address) {
+            return /^(UQ|EQ)[A-Za-z0-9_-]{46}$/.test(address);
+        }
+
         function processWithdraw() {
             const wallet = document.getElementById("userWalletInput").value.trim();
             if (balance < MIN_WITHDRAW) {
                 alert("الحد الأدنى للسحب هو " + MIN_WITHDRAW + " USDT. رصيدك الحالي: " + balance.toFixed(4));
                 return;
             }
-            if (refCount < REQUIRED_REFERRALS) {
-                alert("يجب دعوة صديق واحد (" + REQUIRED_REFERRALS + ") على الأقل عبر رابط الدعوة الخاص بك لتفعيل السحب!");
+            if (!isValidTonAddress(wallet)) {
+                alert("عنوان المحفظة غير صحيح! يرجى إدخال عنوان محفظة TON صحيح يبدأ بـ UQ أو EQ ويتكون من 48 رمزاً.");
                 return;
             }
-            if (!wallet) {
-                alert("يرجى إدخال عنوان محفظتك أولاً.");
-                return;
+
+            let userId = "غير معروف";
+            if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+                userId = tg.initDataUnsafe.user.id;
             }
-            alert("تم استيفاء جميع الشروط وإرسال طلب سحب " + balance.toFixed(4) + " USDT بنجاح!");
+
+            const withdrawAmount = balance.toFixed(4);
+            const msg = "طلب سحب جديد (AdReward USDT):\n"
+                      + "معرف المستخدم: " + userId + "\n"
+                      + "المبلغ: " + withdrawAmount + " USDT\n"
+                      + "محفظة TON: " + wallet;
+
             balance = 0;
             localStorage.setItem("usdt_balance", "0");
             updateUI();
             closeWithdrawModal();
+            sendToAdmin(msg);
         }
 
         function copyInviteLink() {
@@ -256,8 +321,7 @@
                 userId = tg.initDataUnsafe.user.id;
             }
             const inviteUrl = "https://t.me?start=" + userId;
-            navigator.clipboard.writeText(inviteUrl);
-            alert("تم نسخ رابط الدعوة الخاص بك!\n" + inviteUrl);
+            copyTextSafely(inviteUrl, "تم نسخ رابط الدعوة الخاص بك!\n" + inviteUrl);
         }
 
         function openAdModal() { document.getElementById("adModal").style.display = "flex"; }
@@ -265,8 +329,7 @@
 
         function copyWallet() {
             const addr = document.getElementById("walletAddr").innerText;
-            navigator.clipboard.writeText(addr);
-            alert("تم نسخ عنوان المحفظة بنجاح!");
+            copyTextSafely(addr, "تم نسخ عنوان محفظة TON بنجاح!");
         }
 
         function submitUsdtAd() {
@@ -279,9 +342,15 @@
                 alert("يرجى ملء جميع بيانات الإعلان أولاً.");
                 return;
             }
-            currentAd = { title: title, desc: desc, url: url };
+
+            const msg = "طلب إعلان ممول جديد (AdReward USDT):\n"
+                      + "الباقة: " + plan + "\n"
+                      + "العنوان: " + title + "\n"
+                      + "الوصف: " + desc + "\n"
+                      + "الرابط: " + url;
+
             closeAdModal();
-            alert("تم استلام طلب إعلانك (" + plan + ")! سيتم تفعيله فور تأكيد التحويل.");
+            sendToAdmin(msg);
         }
 
         updateUI();
