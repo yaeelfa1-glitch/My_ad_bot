@@ -6,41 +6,48 @@
     <title>AdReward USDT</title>
 </head>
 <style>
-    body { font-family: sans-serif; background: #130f26; color: #fff; padding: 20px; }
-    .card { background: #1e183b; border-radius: 10px; padding: 15px; margin-bottom: 15px; }
+    body { font-family: sans-serif; background: #130f26; color: #fff; padding: 20px; margin-bottom: 60px; }
+    .card { background: #1e183b; border-radius: 10px; padding: 15px; margin-bottom: 15px; border: 1px solid #2c2452; }
     .balance-title { font-size: 13px; color: #aaa; }
-    .balance-amount { font-size: 36px; font-weight: bold; margin: 10px 0; }
-    button { width: 100%; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .balance-amount { font-size: 36px; font-weight: bold; margin: 10px 0; color: #00ffcc; }
+    button { width: 100%; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-watch { background: #fffff; color: #130f26; }
-    .btn-withdraw { background: #2c2452; color: #00ffcc; border: 1px solid #00ffcc; }
-    .stats { display: flex; justify-content: space-between; margin-top: 15px; }
-    .stats b { color: #ffffff; }
-    .ref-card { background: #1e183b; border-radius: 10px; padding: 15px; }
-    .ref-title { font-size: 14px; font-weight: bold; }
-    .ref-ops { color: #aaa; font-size: 12px; margin-top: 5px; }
-    .btn-copy { background: #00ffcc; color: #130f26; margin-top: 15px; }
+    .btn-primary { background: #00ffcc; color: #130f26; }
+    .btn-primary:hover { background: #00cca3; }
+    .btn-secondary { background: #2c2452; color: #ffffff; border: 1px solid #00ffcc; }
+    .btn-secondary:hover { background: #3a2f70; }
+    .stats { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px solid #2c2452; }
+    .ref-card { background: #1e183b; border-radius: 10px; padding: 15px; border: 1px solid #2c2452; }
+    .ref-title { font-size: 16px; font-weight: bold; color: #fff; }
+    .ref-ops { color: #aaa; font-size: 14px; margin-top: 5px; }
     .ads-list { margin-top: 20px; }
-    .ad-item { background: #1e183b; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .ad-info { font-size: 14px; }
-    .ad-reward { color: #00ffcc; font-weight: bold; }
-    .btn-watch-ad { background: #2c2452; color: #fff; padding: 6px 12px; border-radius: 5px; font-size: 12px; }
-    .tabs { display: flex; justify-content: space-around; position: fixed; bottom: 0; left: 0; right: 0; background: #1e183b; padding: 10px; border-top: 1px solid #33f; }
-    .tab-btn { background: none; color: #bbb; font-size: 12px; cursor: pointer; }
+    .ad-item { background: #1e183b; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border: 1px solid #2c2452; }
+    .ad-info div:first-child { font-size: 16px; font-weight: bold; }
+    .ad-reward { color: #00ffcc; font-weight: bold; margin-top: 5px; }
+    .btn-action { background: #00ffcc; color: #130f26; padding: 8px 16px; border-radius: 5px; font-size: 14px; text-decoration: none; display: inline-block; font-weight: bold; }
+    .tabs { display: flex; justify-content: space-around; position: fixed; bottom: 0; left: 0; right: 0; background: #1e183b; padding: 10px 0; border-top: 1px solid #2c2452; z-index: 1000; }
+    .tab-btn { background: none; color: #bbb; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; border: none; width: 25%; }
+    .tab-btn svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
     .tab-btn.active { color: #00ffcc; font-weight: bold; }
     .hidden { display: none; }
-    .withdraw-history { margin-top: 20px; background: #1e183b; padding: 15px; border-radius: 10px; }
-    .history-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #332f4a; font-size: 14px; }
+    .withdraw-history { margin-top: 20px; background: #1e183b; padding: 15px; border-radius: 10px; border: 1px solid #2c2452; }
+    .history-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2c2452; font-size: 14px; }
     .status-completed { color: #00ffcc; }
     .status-pending { color: #ffaa00; }
+    .instruction-box { background: #2c2452; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-right: 4px solid #00ffcc; }
+    .instruction-box h4 { margin: 0 0 10px 0; color: #00ffcc; }
+    .instruction-box p { margin: 5px 0; font-size: 14px; color: #ddd; }
+    .wallet-address { font-family: monospace; background: #130f26; padding: 8px; border-radius: 4px; display: block; margin: 10px 0; color: #00ffcc; font-size: 16px; text-align: center; word-break: break-all; border: 1px solid #00ffcc; }
+    input { width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #2c2452; background: #130f26; color: #fff; font-size: 16px; }
+    input::placeholder { color: #666; }
 </style>
 <body>
 
 <div id="main-app">
     <div class="card">
         <div class="balance-title">الرصيد المتاح (USDT)</div>
-        <div class="balance-amount" id="user-balance">Loading...</div>
-        <button class="btn-withdraw" onclick="showSection('withdraw-section')">سحب الأرباح</button>
+        <div class="balance-amount" id="user-balance">0.00</div>
+        <button class="btn-primary" onclick="showSection('withdraw-section')">سحب الأرباح</button>
     </div>
 
     <div class="ads-list">
@@ -51,10 +58,21 @@
 
 <div id="promote-section" class="hidden">
     <h3>ترويج القنوات والبوتات</h3>
-    <div class="card">
-        <input type="text" id="channel-link" placeholder="رابط القناة أو البوت" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: none;">
-        <button class="btn-watch" onclick="submitChannel()">إضافة القناة</button>
+    
+    <div class="instruction-box">
+        <h4>طريقة الإعلان المدفوع اليدوية:</h4>
+        <p>1. قم بتحويل المبلغ المطلوب إلى عنوان المحفظة أدناه (شبكة TRC20 فقط):</p>
+        <span class="wallet-address" id="admin-wallet">TU5j4Z6rTFaZXjBWoKiA4c2Zjy5D7tQv6D</span>
+        <p>2. بعد التحويل، ضع رابط قناتك واضغط على "إرسال للمراجعة".</p>
+        <p>3. سيقوم المشرف بمراجعة الدفع وتفعيل إعلانك يدوياً.</p>
     </div>
+
+    <div class="card">
+        <input type="text" id="channel-link" placeholder="رابط القناة أو البوت (https://...)">
+        <button class="btn-primary" onclick="submitChannelManual()">إرسال للمراجعة</button>
+    </div>
+
+    <h4>إعلاناتي قيد المراجعة / النشطة</h4>
     <div class="ads-list" id="promoted-channels"></div>
 </div>
 
@@ -63,31 +81,43 @@
     <div class="ref-card">
         <div class="ref-title">اربح مكافأة عن كل صديق</div>
         <div class="ref-ops">شارك رابط الإحالة الخاص بك واكسب نسبة من أرباحهم</div>
-        <div style="background: #2c2452; padding: 10px; border-radius: 5px; margin: 15px 0; font-size: 12px; word-break: break-all;" id="ref-link">กำลังโหลด...</div>
-        <button class="btn-copy" onclick="copyRefLink()">نسخ الرابط</button>
+        <div style="background: #130f26; padding: 12px; border-radius: 8px; margin: 15px 0; font-size: 14px; word-break: break-all; border: 1px solid #2c2452; text-align: center; color: #00ffcc;" id="ref-link">Loading...</div>
+        <button class="btn-secondary" onclick="copyRefLink()">نسخ الرابط</button>
     </div>
 </div>
 
 <div id="withdraw-section" class="hidden">
     <h3>سجل المعاملات والسحب</h3>
     <div class="card">
-        <input type="number" id="withdraw-amount" placeholder="المبلغ المراد سحبه (USDT)" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: none;">
-        <input type="text" id="wallet-address" placeholder="عنوان محفظة USDT (TRC20)" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: none;">
-        <button class="btn-watch" onclick="submitWithdraw()">تأكيد السحب</button>
+        <input type="number" id="withdraw-amount" placeholder="المبلغ المراد سحبه (USDT)">
+        <input type="text" id="wallet-address" placeholder="عنوان محفظة USDT (TRC20)">
+        <button class="btn-primary" onclick="submitWithdraw()">تأكيد السحب</button>
     </div>
     
     <div class="withdraw-history">
         <h4>سجل السحب الشفاف</h4>
         <div id="history-container"></div>
     </div>
-    <button class="btn-withdraw" style="margin-top: 10px;" onclick="showSection('main-app')">العودة للرئيسية</button>
+    <button class="btn-secondary" style="margin-top: 15px;" onclick="showSection('main-app')">العودة للرئيسية</button>
 </div>
 
 <div class="tabs">
-    <button class="tab-btn active" onclick="showSection('main-app')">الرئيسية</button>
-    <button class="tab-btn" onclick="showSection('promote-section')">الترويج</button>
-    <button class="tab-btn" onclick="showSection('friends-section')">الأصدقاء</button>
-    <button class="tab-btn" onclick="showSection('withdraw-section')">السحب</button>
+    <button class="tab-btn active" onclick="showSection('main-app')">
+        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        الرئيسية
+    </button>
+    <button class="tab-btn" onclick="showSection('promote-section')">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg>
+        الترويج
+    </button>
+    <button class="tab-btn" onclick="showSection('friends-section')">
+        <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        الأصدقاء
+    </button>
+    <button class="tab-btn" onclick="showSection('withdraw-section')">
+        <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+        السحب
+    </button>
 </div>
 
 <script>
@@ -123,51 +153,59 @@
                             <div>${ad.title}</div>
                             <div class="ad-reward">+${ad.reward} USDT</div>
                         </div>
-                        <button class="btn-watch-ad" onclick="watchAd('${ad.id}', '${ad.url}', ${ad.reward})">مشاهدة</button>
+                        <a href="${ad.url}" target="_blank" class="btn-action" onclick="trackAdClick('${ad.id}')">مشاهدة</a>
                     </div>
                 `;
             });
         } else {
-            container.innerHTML = '<div>لا توجد إعلانات متاحة حالياً</div>';
+            container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">لا توجد إعلانات متاحة حالياً</div>';
         }
     }
 
-    async function watchAd(adId, adUrl, reward) {
-        window.open(adUrl, '_blank');
+    async function trackAdClick(adId) {
         await fetchData('/api/complete-ad', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({userId, adId, reward})
+            body: JSON.stringify({userId, adId})
         });
-        loadUserData();
-        loadAds();
+        setTimeout(loadUserData, 1000);
     }
 
     async function loadPromotedChannels() {
-        const channels = await fetchData('/api/channels');
+        const channels = await fetchData(`/api/channels?userId=${userId}`);
         const container = document.getElementById('promoted-channels');
         container.innerHTML = '';
         if (channels && channels.length > 0) {
             channels.forEach(ch => {
+                const statusBadge = ch.status === 'approved' 
+                    ? '<span style="color:#00ffcc;">● نشط</span>' 
+                    : '<span style="color:#ffaa00;">● قيد المراجعة</span>';
                 container.innerHTML += `
                     <div class="ad-item">
-                        <div class="ad-info">${ch.name}</div>
-                        <button class="btn-watch-ad" onclick="window.open('${ch.url}', '_blank')">زيارة</button>
+                        <div class="ad-info">
+                            <div>${ch.url}</div>
+                            <div style="font-size: 12px; margin-top: 5px;">الحالة: ${statusBadge}</div>
+                        </div>
+                        ${ch.status === 'approved' ? `<a href="${ch.url}" target="_blank" class="btn-action" style="background:#2c2452; border:1px solid #00ffcc;">زيارة</a>` : ''}
                     </div>
                 `;
             });
+        } else {
+            container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">لا توجد قنوات مضافة</div>';
         }
     }
 
-    async function submitChannel() {
+    async function submitChannelManual() {
         const url = document.getElementById('channel-link').value;
         if(!url) return alert('يرجى إدخال الرابط');
-        await fetchData('/api/add-channel', {
+        
+        const res = await fetchData('/api/add-channel', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({name: 'قناة معلن', url, advertiserId: userId})
+            body: JSON.stringify({url, userId, status: 'pending'})
         });
-        alert('تمت إضافة القناة بنجاح');
+        
+        alert('تم إرسال طلبك بنجاح! سيقوم المشرف بمراجعة التحويل وتفعيل إعلانك.');
         document.getElementById('channel-link').value = '';
         loadPromotedChannels();
     }
@@ -180,13 +218,13 @@
             history.forEach(item => {
                 container.innerHTML += `
                     <div class="history-item">
-                        <span>${item.amount} USDT - ${item.wallet}</span>
-                        <span class="status-${item.status}">${item.status === 'completed' ? 'مكتملة' : 'قيد المراجعة'}</span>
+                        <span>${item.amount} USDT</span>
+                        <span class="status-${item.status}">${item.status === 'completed' ? '✓ مكتملة' : '⏳ قيد المراجعة'}</span>
                     </div>
                 `;
             });
         } else {
-            container.innerHTML = '<div>لا توجد عمليات سحب سابقة</div>';
+            container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">لا توجد عمليات سحب سابقة</div>';
         }
     }
 
@@ -224,13 +262,16 @@
         document.getElementById('withdraw-section').classList.add('hidden');
         document.getElementById(sectionId).classList.remove('hidden');
         
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+
         if(sectionId === 'withdraw-section') loadWithdrawHistory();
+        if(sectionId === 'promote-section') loadPromotedChannels();
     }
 
     window.onload = () => {
         loadUserData();
         loadAds();
-        loadPromotedChannels();
     };
 </script>
 
