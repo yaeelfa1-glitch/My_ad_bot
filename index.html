@@ -20,9 +20,10 @@
         .ref-ops { color: #aaa; font-size: 14px; margin-top: 5px; }
         .ads-list { margin-top: 20px; }
         .ad-item { background: #1e183b; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border: 1px solid #2c2452; gap: 10px; }
-        .ad-info div:first-child { font-size: 16px; font-weight: bold; word-break: break-all; }
+        .ad-info div:first-child { font-size: 15px; font-weight: bold; word-break: break-all; }
+        .ad-sub { color: #aaa; font-size: 12px; margin-top: 4px; }
         .ad-reward { color: #00ffcc; font-weight: bold; margin-top: 5px; }
-        .btn-action { background: #00ffcc; color: #130f26; padding: 8px 16px; border-radius: 5px; font-size: 14px; text-decoration: none; display: inline-block; font-weight: bold; white-space: nowrap; }
+        .btn-action { background: #00ffcc; color: #130f26; padding: 8px 14px; border-radius: 6px; font-size: 13px; text-decoration: none; display: inline-block; font-weight: bold; white-space: nowrap; border: none; width: auto; }
         .tabs { display: flex; justify-content: space-around; position: fixed; bottom: 0; left: 0; right: 0; background: #1e183b; padding: 10px 0; border-top: 1px solid #2c2452; z-index: 1000; }
         .tab-btn { background: none; color: #bbb; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; border: none; width: 25%; padding: 4px 0; }
         .tab-btn svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
@@ -35,9 +36,10 @@
         .instruction-box { background: #2c2452; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-right: 4px solid #00ffcc; }
         .instruction-box h4 { margin: 0 0 10px 0; color: #00ffcc; }
         .instruction-box p { margin: 5px 0; font-size: 14px; color: #ddd; }
-        .wallet-address { font-family: monospace; background: #130f26; padding: 8px; border-radius: 4px; display: block; margin: 10px 0; color: #00ffcc; font-size: 16px; text-align: center; word-break: break-all; border: 1px solid #00ffcc; }
-        input { width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #2c2452; background: #130f26; color: #fff; font-size: 16px; }
+        .wallet-address { font-family: monospace; background: #130f26; padding: 8px; border-radius: 4px; display: block; margin: 10px 0; color: #00ffcc; font-size: 15px; text-align: center; word-break: break-all; border: 1px solid #00ffcc; }
+        input, select { width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #2c2452; background: #130f26; color: #fff; font-size: 15px; }
         input::placeholder { color: #666; }
+        .package-info { font-size: 13px; color: #00ffcc; margin-bottom: 12px; }
     </style>
 </head>
 <body>
@@ -53,20 +55,32 @@
         <h3>شاهد الإعلانات لكسب USDT</h3>
         <div id="ads-container"></div>
     </div>
+
+    <div class="ads-list">
+        <h3>إعلانات ترويجية</h3>
+        <div id="promo-ads-container"></div>
+    </div>
 </div>
 
 <div id="promote-section" class="hidden">
     <h3>ترويج القنوات والبوتات</h3>
     
     <div class="instruction-box">
-        <h4>طريقة الإعلان المدفوع اليدوية:</h4>
-        <p>1. قم بتحويل المبلغ المطلوب إلى عنوان المحفظة أدناه:</p>
+        <h4>باقات وأسعار الترويج:</h4>
+        <p>• <strong>يومان مقابل 1 USDT</strong> (مدة الترويج: يومان)</p>
+        <p>• <strong>خمسة أيام مقابل 2 USDT</strong> (مدة الترويج: 5 أيام)</p>
+        <p>1. قم بتحويل قيمة الباقة المختارة إلى المحفظة التالية:</p>
         <span class="wallet-address" id="admin-wallet">UQDA9WTztjpVRm68qLDSLfz5_QiwYm-5wSVk2WrSGr2qxxYz</span>
-        <p>2. بعد التحويل، ضع رابط قناتك واضغط على "إرسال للمراجعة".</p>
-        <p>3. سيقوم المشرف بمراجعة الدفع وتفعيل إعلانك يدوياً.</p>
+        <p>2. اختر الباقة وضع رابط قناتك أو بوتك ثم اضغط "إرسال للمراجعة".</p>
     </div>
 
     <div class="card">
+        <label style="display:block; margin-bottom:6px; font-size:14px;">اختر مدة وسعر الترويج:</label>
+        <select id="promo-package" onchange="updatePackageHint()">
+            <option value="2_days" data-days="2" data-price="1">يومان مقابل 1 USDT</option>
+            <option value="5_days" data-days="5" data-price="2">خمسة أيام مقابل 2 USDT</option>
+        </select>
+        <div class="package-info" id="package-hint">المدة: يومان • السعر المطلوب: 1 USDT</div>
         <input type="text" id="channel-link" placeholder="رابط القناة أو البوت (https://...)">
         <button class="btn-primary" onclick="submitChannelManual()">إرسال للمراجعة</button>
     </div>
@@ -121,6 +135,7 @@
 
 <script>
     const BACKEND_URL = 'https://my-ad-bot-nz8i.onrender.com';
+    const activeTimers = {};
 
     function escapeHtml(str) {
         return String(str ?? '')
@@ -149,6 +164,16 @@
     const userId = getOrCreateUserId();
     const referredBy = getRefParam();
 
+    function updatePackageHint() {
+        const select = document.getElementById('promo-package');
+        const hint = document.getElementById('package-hint');
+        if (select.value === '5_days') {
+            hint.innerText = 'المدة: 5 أيام • السعر المطلوب: 2 USDT';
+        } else {
+            hint.innerText = 'المدة: يومان • السعر المطلوب: 1 USDT';
+        }
+    }
+
     async function fetchData(endpoint, options = {}) {
         try {
             const res = await fetch(BACKEND_URL + endpoint, options);
@@ -168,6 +193,27 @@
         document.getElementById('ref-link').innerText = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(userId)}`;
     }
 
+    function renderAdCard(ad, isPromo) {
+        const safeTitle = escapeHtml(ad.title || 'إعلان متاح');
+        const rewardVal = isPromo ? 0.0005 : Number(ad.reward || 0.0003);
+        const safeReward = escapeHtml(rewardVal.toFixed(4));
+        const durationSec = Number(ad.duration || 10);
+        const rawUrl = (typeof ad.url === 'string' && ad.url.trim()) ? ad.url.trim() : '#';
+        const safeUrl = escapeHtml(rawUrl);
+        const btnId = `btn-${isPromo ? 'promo' : 'reg'}-${escapeHtml(String(ad.id || '1'))}`;
+
+        return `
+            <div class="ad-item">
+                <div class="ad-info">
+                    <div>${safeTitle}</div>
+                    <div class="ad-sub">مدة المشاهدة: ${durationSec} ثوانٍ</div>
+                    <div class="ad-reward">+${safeReward} USDT</div>
+                </div>
+                <button id="${btnId}" class="btn-action" onclick="startTimedAd('${btnId}', '${encodeURIComponent(rawUrl)}', '${escapeHtml(String(ad.id || ''))}', ${durationSec}, ${isPromo ? 'true' : 'false'})">مشاهدة</button>
+            </div>
+        `;
+    }
+
     async function loadAds() {
         const response = await fetchData('/api/ads');
         const ads = Array.isArray(response) ? response : (response && Array.isArray(response.ads) ? response.ads : []);
@@ -176,35 +222,68 @@
 
         if (ads.length > 0) {
             ads.forEach(ad => {
-                const safeTitle = escapeHtml(ad.title || 'إعلان متاح');
-                const safeReward = escapeHtml(Number(ad.reward || 0.0003).toFixed(4));
-                const safeId = escapeHtml(ad.id || 'ad_1');
-                const rawUrl = (typeof ad.url === 'string' && ad.url.trim()) ? ad.url.trim() : '#';
-                const safeUrl = escapeHtml(rawUrl);
-                const targetAttr = rawUrl !== '#' ? 'target="_blank" rel="noopener noreferrer"' : '';
-
-                container.innerHTML += `
-                    <div class="ad-item">
-                        <div class="ad-info">
-                            <div>${safeTitle}</div>
-                            <div class="ad-reward">+${safeReward} USDT</div>
-                        </div>
-                        <a href="${safeUrl}" ${targetAttr} class="btn-action" onclick="trackAdClick('${safeId}')">مشاهدة</a>
-                    </div>
-                `;
+                container.innerHTML += renderAdCard(ad, false);
             });
         } else {
             container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">لا توجد إعلانات متاحة حالياً</div>';
         }
     }
 
-    async function trackAdClick(adId) {
-        await fetchData('/api/complete-ad', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId, adId })
-        });
-        setTimeout(loadUserData, 1000);
+    async function loadPromoAds() {
+        const response = await fetchData('/api/promo-ads');
+        const promoAds = (response && Array.isArray(response.promoAds)) ? response.promoAds : [];
+        const container = document.getElementById('promo-ads-container');
+        container.innerHTML = '';
+
+        if (promoAds.length > 0) {
+            promoAds.forEach(ad => {
+                container.innerHTML += renderAdCard(ad, true);
+            });
+        } else {
+            container.innerHTML = '<div style="text-align: center; color: #666; padding: 20px;">لا توجد إعلانات ترويجية نشطة حالياً</div>';
+        }
+    }
+
+    function startTimedAd(btnId, encodedUrl, adId, durationSec, isPromo) {
+        if (activeTimers[btnId]) return;
+
+        const url = decodeURIComponent(encodedUrl);
+        if (url && url !== '#') {
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
+
+        const btn = document.getElementById(btnId);
+        let remaining = Number(durationSec) || 10;
+        if (btn) {
+            btn.disabled = true;
+            btn.innerText = `انتظر ${remaining}ث`;
+        }
+
+        activeTimers[btnId] = setInterval(async () => {
+            remaining -= 1;
+            if (remaining > 0) {
+                if (btn) btn.innerText = `انتظر ${remaining}ث`;
+                return;
+            }
+
+            clearInterval(activeTimers[btnId]);
+            delete activeTimers[btnId];
+
+            const result = await fetchData('/api/complete-ad', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, adId, isPromo })
+            });
+
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = 'مشاهدة';
+            }
+
+            if (result && result.success) {
+                loadUserData();
+            }
+        }, 1000);
     }
 
     async function loadPromotedChannels() {
@@ -216,6 +295,7 @@
         if (channels.length > 0) {
             channels.forEach(ch => {
                 const safeUrl = escapeHtml(ch.url || '');
+                const daysText = ch.duration_days === 5 ? '5 أيام (2 USDT)' : 'يومان (1 USDT)';
                 const statusBadge = ch.status === 'approved'
                     ? '<span style="color:#00ffcc;">● نشط</span>'
                     : '<span style="color:#ffaa00;">● قيد المراجعة</span>';
@@ -223,6 +303,7 @@
                     <div class="ad-item">
                         <div class="ad-info">
                             <div>${safeUrl}</div>
+                            <div class="ad-sub">الباقة: ${escapeHtml(daysText)}</div>
                             <div style="font-size: 12px; margin-top: 5px;">الحالة: ${statusBadge}</div>
                         </div>
                         ${ch.status === 'approved' ? `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="btn-action" style="background:#2c2452; border:1px solid #00ffcc; color:#fff;">زيارة</a>` : ''}
@@ -236,16 +317,17 @@
 
     async function submitChannelManual() {
         const url = document.getElementById('channel-link').value.trim();
+        const packageKey = document.getElementById('promo-package').value;
         if (!url) return alert('يرجى إدخال الرابط');
 
         const res = await fetchData('/api/add-channel', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url, userId, status: 'pending' })
+            body: JSON.stringify({ url, userId, packageKey, status: 'pending' })
         });
 
         if (res && (res.success === undefined || res.success)) {
-            alert('تم إرسال طلبك بنجاح! سيقوم المشرف بمراجعة التحويل وتفعيل إعلانك.');
+            alert('تم إرسال طلب الترويج بنجاح! سيتم تفعيل الإعلان بعد تأكيد الدفع والمراجعة.');
             document.getElementById('channel-link').value = '';
             loadPromotedChannels();
         } else {
@@ -316,13 +398,19 @@
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         if (tabElement) tabElement.classList.add('active');
 
+        if (sectionId === 'main-app') {
+            loadAds();
+            loadPromoAds();
+        }
         if (sectionId === 'withdraw-section') loadWithdrawHistory();
         if (sectionId === 'promote-section') loadPromotedChannels();
     }
 
     window.onload = () => {
+        updatePackageHint();
         loadUserData();
         loadAds();
+        loadPromoAds();
     };
 </script>
 
