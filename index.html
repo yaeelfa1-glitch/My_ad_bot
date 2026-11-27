@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AdReward USDT</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { font-family: sans-serif; background: #130f26; color: #fff; padding: 20px; margin-bottom: 70px; }
         .card { background: #1e183b; border-radius: 10px; padding: 15px; margin-bottom: 15px; border: 1px solid #2c2452; }
@@ -64,7 +65,7 @@
 
 <div id="promote-section" class="hidden">
     <h3>ترويج القنوات والبوتات</h3>
-    
+
     <div class="instruction-box">
         <h4>باقات وأسعار الترويج:</h4>
         <p>• <strong>يومان مقابل 1 USDT</strong> (مدة الترويج: يومان)</p>
@@ -106,7 +107,7 @@
         <input type="text" id="wallet-address" placeholder="عنوان محفظة USDT">
         <button class="btn-primary" onclick="submitWithdraw()">تأكيد السحب</button>
     </div>
-    
+
     <div class="withdraw-history">
         <h4>سجل السحب الشفاف</h4>
         <div id="history-container"></div>
@@ -134,7 +135,7 @@
 </div>
 
 <script>
-    const BACKEND_URL = 'https://my-ad-bot-nz8i.onrender.com';
+    const BACKEND_URL = 'https://ad-bot-nz8i.onrender.com';
     const activeTimers = {};
 
     function escapeHtml(str) {
@@ -147,6 +148,16 @@
     }
 
     function getOrCreateUserId() {
+        const tg = window.Telegram && window.Telegram.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+            const tgUser = tg.initDataUnsafe && tg.initDataUnsafe.user;
+            if (tgUser && tgUser.id) {
+                return 'tg_' + String(tgUser.id);
+            }
+        }
+
         let savedId = localStorage.getItem('adreward_user_id');
         if (!savedId) {
             savedId = 'user_' + Math.floor(Math.random() * 1000000);
@@ -155,13 +166,14 @@
         return savedId;
     }
 
+    const userId = getOrCreateUserId();
+
     function getRefParam() {
         const params = new URLSearchParams(window.location.search);
         const ref = params.get('ref');
         return (ref && ref !== userId) ? ref : null;
     }
 
-    const userId = getOrCreateUserId();
     const referredBy = getRefParam();
 
     function updatePackageHint() {
@@ -199,7 +211,6 @@
         const safeReward = escapeHtml(rewardVal.toFixed(4));
         const durationSec = Number(ad.duration || 10);
         const rawUrl = (typeof ad.url === 'string' && ad.url.trim()) ? ad.url.trim() : '#';
-        const safeUrl = escapeHtml(rawUrl);
         const btnId = `btn-${isPromo ? 'promo' : 'reg'}-${escapeHtml(String(ad.id || '1'))}`;
 
         return `
@@ -326,7 +337,7 @@
             body: JSON.stringify({ url, userId, packageKey, status: 'pending' })
         });
 
-        if (res && (res.success === undefined || res.success)) {
+        if (res && res.success) {
             alert('تم إرسال طلب الترويج بنجاح! سيتم تفعيل الإعلان بعد تأكيد الدفع والمراجعة.');
             document.getElementById('channel-link').value = '';
             loadPromotedChannels();
