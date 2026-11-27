@@ -4,50 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AdReward USDT</title>
+    <style>
+        body { font-family: sans-serif; background: #130f26; color: #fff; padding: 20px; margin-bottom: 70px; }
+        .card { background: #1e183b; border-radius: 10px; padding: 15px; margin-bottom: 15px; border: 1px solid #2c2452; }
+        .balance-title { font-size: 13px; color: #aaa; }
+        .balance-amount { font-size: 32px; font-weight: bold; margin: 10px 0; color: #00ffcc; word-break: break-all; }
+        button { width: 100%; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary { background: #00ffcc; color: #130f26; }
+        .btn-primary:hover { background: #00cca3; }
+        .btn-secondary { background: #2c2452; color: #ffffff; border: 1px solid #00ffcc; }
+        .btn-secondary:hover { background: #3a2f70; }
+        .ref-card { background: #1e183b; border-radius: 10px; padding: 15px; border: 1px solid #2c2452; }
+        .ref-title { font-size: 16px; font-weight: bold; color: #fff; }
+        .ref-ops { color: #aaa; font-size: 14px; margin-top: 5px; }
+        .ads-list { margin-top: 20px; }
+        .ad-item { background: #1e183b; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border: 1px solid #2c2452; gap: 10px; }
+        .ad-info div:first-child { font-size: 16px; font-weight: bold; word-break: break-all; }
+        .ad-reward { color: #00ffcc; font-weight: bold; margin-top: 5px; }
+        .btn-action { background: #00ffcc; color: #130f26; padding: 8px 16px; border-radius: 5px; font-size: 14px; text-decoration: none; display: inline-block; font-weight: bold; white-space: nowrap; }
+        .tabs { display: flex; justify-content: space-around; position: fixed; bottom: 0; left: 0; right: 0; background: #1e183b; padding: 10px 0; border-top: 1px solid #2c2452; z-index: 1000; }
+        .tab-btn { background: none; color: #bbb; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; border: none; width: 25%; padding: 4px 0; }
+        .tab-btn svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
+        .tab-btn.active { color: #00ffcc; font-weight: bold; }
+        .hidden { display: none; }
+        .withdraw-history { margin-top: 20px; background: #1e183b; padding: 15px; border-radius: 10px; border: 1px solid #2c2452; }
+        .history-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2c2452; font-size: 14px; }
+        .status-completed { color: #00ffcc; }
+        .status-pending { color: #ffaa00; }
+        .instruction-box { background: #2c2452; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-right: 4px solid #00ffcc; }
+        .instruction-box h4 { margin: 0 0 10px 0; color: #00ffcc; }
+        .instruction-box p { margin: 5px 0; font-size: 14px; color: #ddd; }
+        .wallet-address { font-family: monospace; background: #130f26; padding: 8px; border-radius: 4px; display: block; margin: 10px 0; color: #00ffcc; font-size: 16px; text-align: center; word-break: break-all; border: 1px solid #00ffcc; }
+        input { width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #2c2452; background: #130f26; color: #fff; font-size: 16px; }
+        input::placeholder { color: #666; }
+    </style>
 </head>
-<style>
-    body { font-family: sans-serif; background: #130f26; color: #fff; padding: 20px; margin-bottom: 60px; }
-    .card { background: #1e183b; border-radius: 10px; padding: 15px; margin-bottom: 15px; border: 1px solid #2c2452; }
-    .balance-title { font-size: 13px; color: #aaa; }
-    .balance-amount { font-size: 36px; font-weight: bold; margin: 10px 0; color: #00ffcc; }
-    button { width: 100%; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-primary { background: #00ffcc; color: #130f26; }
-    .btn-primary:hover { background: #00cca3; }
-    .btn-secondary { background: #2c2452; color: #ffffff; border: 1px solid #00ffcc; }
-    .btn-secondary:hover { background: #3a2f70; }
-    .stats { display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px solid #2c2452; }
-    .ref-card { background: #1e183b; border-radius: 10px; padding: 15px; border: 1px solid #2c2452; }
-    .ref-title { font-size: 16px; font-weight: bold; color: #fff; }
-    .ref-ops { color: #aaa; font-size: 14px; margin-top: 5px; }
-    .ads-list { margin-top: 20px; }
-    .ad-item { background: #1e183b; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border: 1px solid #2c2452; }
-    .ad-info div:first-child { font-size: 16px; font-weight: bold; }
-    .ad-reward { color: #00ffcc; font-weight: bold; margin-top: 5px; }
-    .btn-action { background: #00ffcc; color: #130f26; padding: 8px 16px; border-radius: 5px; font-size: 14px; text-decoration: none; display: inline-block; font-weight: bold; }
-    .tabs { display: flex; justify-content: space-around; position: fixed; bottom: 0; left: 0; right: 0; background: #1e183b; padding: 10px 0; border-top: 1px solid #2c2452; z-index: 1000; }
-    .tab-btn { background: none; color: #bbb; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; align-items: center; border: none; width: 25%; }
-    .tab-btn svg { width: 24px; height: 24px; margin-bottom: 4px; fill: currentColor; }
-    .tab-btn.active { color: #00ffcc; font-weight: bold; }
-    .hidden { display: none; }
-    .withdraw-history { margin-top: 20px; background: #1e183b; padding: 15px; border-radius: 10px; border: 1px solid #2c2452; }
-    .history-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2c2452; font-size: 14px; }
-    .status-completed { color: #00ffcc; }
-    .status-pending { color: #ffaa00; }
-    .instruction-box { background: #2c2452; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-right: 4px solid #00ffcc; }
-    .instruction-box h4 { margin: 0 0 10px 0; color: #00ffcc; }
-    .instruction-box p { margin: 5px 0; font-size: 14px; color: #ddd; }
-    .wallet-address { font-family: monospace; background: #130f26; padding: 8px; border-radius: 4px; display: block; margin: 10px 0; color: #00ffcc; font-size: 16px; text-align: center; word-break: break-all; border: 1px solid #00ffcc; }
-    input { width: 100%; box-sizing: border-box; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #2c2452; background: #130f26; color: #fff; font-size: 16px; }
-    input::placeholder { color: #666; }
-</style>
 <body>
 
 <div id="main-app">
     <div class="card">
         <div class="balance-title">الرصيد المتاح (USDT)</div>
-        <div class="balance-amount" id="user-balance">0.00</div>
-        <button class="btn-primary" onclick="showSection('withdraw-section')">سحب الأرباح</button>
+        <div class="balance-amount" id="user-balance">0.0000</div>
+        <button class="btn-primary" onclick="showSection('withdraw-section', document.querySelectorAll('.tab-btn')[3])">سحب الأرباح</button>
     </div>
 
     <div class="ads-list">
@@ -89,7 +88,7 @@
 <div id="withdraw-section" class="hidden">
     <h3>سجل المعاملات والسحب</h3>
     <div class="card">
-        <input type="number" id="withdraw-amount" placeholder="المبلغ المراد سحبه (USDT)">
+        <input type="number" id="withdraw-amount" step="any" placeholder="المبلغ المراد سحبه (USDT)">
         <input type="text" id="wallet-address" placeholder="عنوان محفظة USDT">
         <button class="btn-primary" onclick="submitWithdraw()">تأكيد السحب</button>
     </div>
@@ -98,23 +97,23 @@
         <h4>سجل السحب الشفاف</h4>
         <div id="history-container"></div>
     </div>
-    <button class="btn-secondary" style="margin-top: 15px;" onclick="showSection('main-app')">العودة للرئيسية</button>
+    <button class="btn-secondary" style="margin-top: 15px;" onclick="showSection('main-app', document.querySelectorAll('.tab-btn')[0])">العودة للرئيسية</button>
 </div>
 
 <div class="tabs">
-    <button class="tab-btn active" onclick="showSection('main-app')">
+    <button class="tab-btn active" onclick="showSection('main-app', this)">
         <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
         الرئيسية
     </button>
-    <button class="tab-btn" onclick="showSection('promote-section')">
+    <button class="tab-btn" onclick="showSection('promote-section', this)">
         <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z"/></svg>
         الترويج
     </button>
-    <button class="tab-btn" onclick="showSection('friends-section')">
+    <button class="tab-btn" onclick="showSection('friends-section', this)">
         <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
         الأصدقاء
     </button>
-    <button class="tab-btn" onclick="showSection('withdraw-section')">
+    <button class="tab-btn" onclick="showSection('withdraw-section', this)">
         <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
         السحب
     </button>
@@ -122,7 +121,30 @@
 
 <script>
     const BACKEND_URL = 'https://my-ad-bot-nz8i.onrender.com';
-    let userId = 'user_' + Math.floor(Math.random()*1000000); 
+
+    function getOrCreateUserId() {
+        let savedId = localStorage.getItem('adreward_user_id');
+        if (!savedId) {
+            savedId = 'user_' + Math.floor(Math.random() * 1000000);
+            localStorage.setItem('adreward_user_id', savedId);
+        }
+        return savedId;
+    }
+
+    function getRefParam() {
+        const params = new URLSearchParams(window.location.search);
+        const ref = params.get('ref');
+        return (ref && ref !== userId) ? ref : null;
+    }
+
+    const userId = getOrCreateUserId();
+    const referredBy = getRefParam();
+
+    function formatBalance(val) {
+        const num = Number(val);
+        if (!Number.isFinite(num) || num === 0) return '0.0000';
+        return num.toFixed(4).replace(/\.?0+$/, (m) => m.length > 1 ? num.toFixed(4) : num.toFixed(4));
+    }
 
     async function fetchData(endpoint, options = {}) {
         try {
@@ -136,9 +158,11 @@
     }
 
     async function loadUserData() {
-        const data = await fetchData(`/api/user?id=${userId}`);
-        document.getElementById('user-balance').innerText = data ? data.balance.toFixed(2) : '0.00';
-        document.getElementById('ref-link').innerText = `${window.location.origin}?ref=${userId}`;
+        const refQuery = referredBy ? `&ref=${encodeURIComponent(referredBy)}` : '';
+        const data = await fetchData(`/api/user?id=${encodeURIComponent(userId)}${refQuery}`);
+        const balanceEl = document.getElementById('user-balance');
+        balanceEl.innerText = (data && typeof data.balance === 'number') ? data.balance.toFixed(4) : '0.0000';
+        document.getElementById('ref-link').innerText = `${window.location.origin}${window.location.pathname}?ref=${encodeURIComponent(userId)}`;
     }
 
     async function loadAds() {
@@ -153,7 +177,7 @@
                             <div>${ad.title}</div>
                             <div class="ad-reward">+${ad.reward} USDT</div>
                         </div>
-                        <a href="${ad.url}" target="_blank" class="btn-action" onclick="trackAdClick('${ad.id}')">مشاهدة</a>
+                        <a href="${ad.url}" target="_blank" rel="noopener noreferrer" class="btn-action" onclick="trackAdClick('${ad.id}')">مشاهدة</a>
                     </div>
                 `;
             });
@@ -165,20 +189,20 @@
     async function trackAdClick(adId) {
         await fetchData('/api/complete-ad', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({userId, adId})
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, adId })
         });
         setTimeout(loadUserData, 1000);
     }
 
     async function loadPromotedChannels() {
-        const channels = await fetchData(`/api/channels?userId=${userId}`);
+        const channels = await fetchData(`/api/channels?userId=${encodeURIComponent(userId)}`);
         const container = document.getElementById('promoted-channels');
         container.innerHTML = '';
         if (channels && channels.length > 0) {
             channels.forEach(ch => {
-                const statusBadge = ch.status === 'approved' 
-                    ? '<span style="color:#00ffcc;">● نشط</span>' 
+                const statusBadge = ch.status === 'approved'
+                    ? '<span style="color:#00ffcc;">● نشط</span>'
                     : '<span style="color:#ffaa00;">● قيد المراجعة</span>';
                 container.innerHTML += `
                     <div class="ad-item">
@@ -186,7 +210,7 @@
                             <div>${ch.url}</div>
                             <div style="font-size: 12px; margin-top: 5px;">الحالة: ${statusBadge}</div>
                         </div>
-                        ${ch.status === 'approved' ? `<a href="${ch.url}" target="_blank" class="btn-action" style="background:#2c2452; border:1px solid #00ffcc;">زيارة</a>` : ''}
+                        ${ch.status === 'approved' ? `<a href="${ch.url}" target="_blank" rel="noopener noreferrer" class="btn-action" style="background:#2c2452; border:1px solid #00ffcc; color:#fff;">زيارة</a>` : ''}
                     </div>
                 `;
             });
@@ -196,22 +220,26 @@
     }
 
     async function submitChannelManual() {
-        const url = document.getElementById('channel-link').value;
-        if(!url) return alert('يرجى إدخال الرابط');
-        
+        const url = document.getElementById('channel-link').value.trim();
+        if (!url) return alert('يرجى إدخال الرابط');
+
         const res = await fetchData('/api/add-channel', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({url, userId, status: 'pending'})
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, userId, status: 'pending' })
         });
-        
-        alert('تم إرسال طلبك بنجاح! سيقوم المشرف بمراجعة التحويل وتفعيل إعلانك.');
-        document.getElementById('channel-link').value = '';
-        loadPromotedChannels();
+
+        if (res) {
+            alert('تم إرسال طلبك بنجاح! سيقوم المشرف بمراجعة التحويل وتفعيل إعلانك.');
+            document.getElementById('channel-link').value = '';
+            loadPromotedChannels();
+        } else {
+            alert('تعذر إرسال الطلب حالياً، حاول مرة أخرى.');
+        }
     }
 
     async function loadWithdrawHistory() {
-        const history = await fetchData(`/api/withdraw-history?id=${userId}`);
+        const history = await fetchData(`/api/withdraw-history?id=${encodeURIComponent(userId)}`);
         const container = document.getElementById('history-container');
         container.innerHTML = '';
         if (history && history.length > 0) {
@@ -230,15 +258,15 @@
 
     async function submitWithdraw() {
         const amount = parseFloat(document.getElementById('withdraw-amount').value);
-        const wallet = document.getElementById('wallet-address').value;
-        if(isNaN(amount) || amount <= 0 || !wallet) return alert('يرجى إدخال بيانات صحيحة');
-        
+        const wallet = document.getElementById('wallet-address').value.trim();
+        if (isNaN(amount) || amount <= 0 || !wallet) return alert('يرجى إدخال بيانات صحيحة');
+
         const res = await fetchData('/api/withdraw', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({userId, amount, wallet})
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, amount, wallet })
         });
-        if(res && res.success) {
+        if (res && res.success) {
             alert('تم تقديم طلب السحب بنجاح');
             document.getElementById('withdraw-amount').value = '';
             document.getElementById('wallet-address').value = '';
@@ -251,22 +279,25 @@
 
     function copyRefLink() {
         const text = document.getElementById('ref-link').innerText;
-        navigator.clipboard.writeText(text);
-        alert('تم نسخ الرابط');
+        navigator.clipboard.writeText(text).then(() => {
+            alert('تم نسخ الرابط');
+        }).catch(() => {
+            alert('تعذر النسخ تلقائياً، يرجى نسخ الرابط يدوياً');
+        });
     }
 
-    function showSection(sectionId) {
+    function showSection(sectionId, tabElement) {
         document.getElementById('main-app').classList.add('hidden');
         document.getElementById('promote-section').classList.add('hidden');
         document.getElementById('friends-section').classList.add('hidden');
         document.getElementById('withdraw-section').classList.add('hidden');
         document.getElementById(sectionId).classList.remove('hidden');
-        
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        event.currentTarget.classList.add('active');
 
-        if(sectionId === 'withdraw-section') loadWithdrawHistory();
-        if(sectionId === 'promote-section') loadPromotedChannels();
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        if (tabElement) tabElement.classList.add('active');
+
+        if (sectionId === 'withdraw-section') loadWithdrawHistory();
+        if (sectionId === 'promote-section') loadPromotedChannels();
     }
 
     window.onload = () => {
