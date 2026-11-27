@@ -24,6 +24,14 @@ const db = new sqlite3.Database('./users.db', (err) => {
         status TEXT DEFAULT 'pending',
         created_at INTEGER
       )`);
+
+      db.run(`CREATE TABLE IF NOT EXISTS channels (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT,
+        url TEXT,
+        status TEXT DEFAULT 'pending',
+        created_at INTEGER
+      )`);
     });
   }
 });
@@ -38,7 +46,8 @@ app.get('/api/ads', (req, res) => {
       id: 'ad_1',
       title: 'شاهد الإعلان واحصل على مكافأة',
       reward: 0.0003,
-      duration: 5
+      duration: 5,
+      url: 'https://t.me'
     }
   ];
   res.json({ success: true, ads });
@@ -112,6 +121,66 @@ app.post('/api/complete-ad', (req, res) => {
     }
     res.json({ success: true, reward: 0.0003 });
   });
+});
+
+app.get('/api/channels', (req, res) => {
+  const userId = req.query.userId;
+  if (!userId) {
+    return res.status(400).json({ success: false, message: 'معرف المستخدم مطلوب.' });
+  }
+
+  db.all(
+    `SELECT id, url, status, created_at FROM channels WHERE user_id = ? ORDER BY id DESC`,
+    [userId],
+    (err, rows) => {
+      if (err) {
+        return res.status(500).json({ success: false, message: err.message });
+      }
+      res.json({ success: true, channels: rows || [] });
+    }
+  );
+});
+
+app.post('/api/add-channel', (req, res) => {
+  const { userId, url } = req.body;
+  const trimmedUrl = String(url || '').trim();
+  const now = Math.floor(Date.now() / 1000);
+
+  if (!userId) {
+    return res.status(400).json({ success: false, message: 'معرف المستخدم مطلوب.' });
+  }
+  if (!trimmedUrl) {
+    return res.status(400).json({ success: false, message: 'يرجى إدخال رابط صحيح.' });
+  }
+
+  db.run(
+    `INSERT INTO channels (user_id, url, status, created_at) VALUES (?, ?, 'pending', ?)`,
+    [userId, trimmedUrl, now],
+    function (err) {
+      if (err) {
+        return res.status(500).json({ success: false, message: err.message });
+      }
+      res.json({ success: true, id: this.lastID, status: 'pending' });
+    }
+  );
+});
+
+app.get('/api/withdraw-history', (req, res) => {
+  const userId = req.query.id;
+  if (!userId) {
+    return res.status(400).json({ success: false, message: 'معرف المستخدم مطلوب.' });
+  }
+
+  db.all(
+    `SELECT id, amount, wallet, status, created_at FROM withdrawals WHERE user_id = ? ORDER BY id DESC`,
+    [userId],
+    (err, rows) => {
+      if (err) {
+        return res.status(500).json({ success: false, message: err.message });
+      }
+      res.json({ success: true, history: rows || [] });
+    }
+  );
 });
 
 app.post('/api/withdraw', (req, res) => {
