@@ -122,6 +122,15 @@
 <script>
     const BACKEND_URL = 'https://my-ad-bot-nz8i.onrender.com';
 
+    function escapeHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
     function getOrCreateUserId() {
         let savedId = localStorage.getItem('adreward_user_id');
         if (!savedId) {
@@ -139,12 +148,6 @@
 
     const userId = getOrCreateUserId();
     const referredBy = getRefParam();
-
-    function formatBalance(val) {
-        const num = Number(val);
-        if (!Number.isFinite(num) || num === 0) return '0.0000';
-        return num.toFixed(4).replace(/\.?0+$/, (m) => m.length > 1 ? num.toFixed(4) : num.toFixed(4));
-    }
 
     async function fetchData(endpoint, options = {}) {
         try {
@@ -166,18 +169,27 @@
     }
 
     async function loadAds() {
-        const ads = await fetchData('/api/ads');
+        const response = await fetchData('/api/ads');
+        const ads = Array.isArray(response) ? response : (response && Array.isArray(response.ads) ? response.ads : []);
         const container = document.getElementById('ads-container');
         container.innerHTML = '';
-        if (ads && ads.length > 0) {
+
+        if (ads.length > 0) {
             ads.forEach(ad => {
+                const safeTitle = escapeHtml(ad.title || 'إعلان متاح');
+                const safeReward = escapeHtml(Number(ad.reward || 0.0003).toFixed(4));
+                const safeId = escapeHtml(ad.id || 'ad_1');
+                const rawUrl = (typeof ad.url === 'string' && ad.url.trim()) ? ad.url.trim() : '#';
+                const safeUrl = escapeHtml(rawUrl);
+                const targetAttr = rawUrl !== '#' ? 'target="_blank" rel="noopener noreferrer"' : '';
+
                 container.innerHTML += `
                     <div class="ad-item">
                         <div class="ad-info">
-                            <div>${ad.title}</div>
-                            <div class="ad-reward">+${ad.reward} USDT</div>
+                            <div>${safeTitle}</div>
+                            <div class="ad-reward">+${safeReward} USDT</div>
                         </div>
-                        <a href="${ad.url}" target="_blank" rel="noopener noreferrer" class="btn-action" onclick="trackAdClick('${ad.id}')">مشاهدة</a>
+                        <a href="${safeUrl}" ${targetAttr} class="btn-action" onclick="trackAdClick('${safeId}')">مشاهدة</a>
                     </div>
                 `;
             });
@@ -196,21 +208,24 @@
     }
 
     async function loadPromotedChannels() {
-        const channels = await fetchData(`/api/channels?userId=${encodeURIComponent(userId)}`);
+        const response = await fetchData(`/api/channels?userId=${encodeURIComponent(userId)}`);
+        const channels = Array.isArray(response) ? response : (response && Array.isArray(response.channels) ? response.channels : []);
         const container = document.getElementById('promoted-channels');
         container.innerHTML = '';
-        if (channels && channels.length > 0) {
+
+        if (channels.length > 0) {
             channels.forEach(ch => {
+                const safeUrl = escapeHtml(ch.url || '');
                 const statusBadge = ch.status === 'approved'
                     ? '<span style="color:#00ffcc;">● نشط</span>'
                     : '<span style="color:#ffaa00;">● قيد المراجعة</span>';
                 container.innerHTML += `
                     <div class="ad-item">
                         <div class="ad-info">
-                            <div>${ch.url}</div>
+                            <div>${safeUrl}</div>
                             <div style="font-size: 12px; margin-top: 5px;">الحالة: ${statusBadge}</div>
                         </div>
-                        ${ch.status === 'approved' ? `<a href="${ch.url}" target="_blank" rel="noopener noreferrer" class="btn-action" style="background:#2c2452; border:1px solid #00ffcc; color:#fff;">زيارة</a>` : ''}
+                        ${ch.status === 'approved' ? `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" class="btn-action" style="background:#2c2452; border:1px solid #00ffcc; color:#fff;">زيارة</a>` : ''}
                     </div>
                 `;
             });
@@ -229,25 +244,30 @@
             body: JSON.stringify({ url, userId, status: 'pending' })
         });
 
-        if (res) {
+        if (res && (res.success === undefined || res.success)) {
             alert('تم إرسال طلبك بنجاح! سيقوم المشرف بمراجعة التحويل وتفعيل إعلانك.');
             document.getElementById('channel-link').value = '';
             loadPromotedChannels();
         } else {
-            alert('تعذر إرسال الطلب حالياً، حاول مرة أخرى.');
+            alert((res && res.message) || 'تعذر إرسال الطلب حالياً، حاول مرة أخرى.');
         }
     }
 
     async function loadWithdrawHistory() {
-        const history = await fetchData(`/api/withdraw-history?id=${encodeURIComponent(userId)}`);
+        const response = await fetchData(`/api/withdraw-history?id=${encodeURIComponent(userId)}`);
+        const history = Array.isArray(response) ? response : (response && Array.isArray(response.history) ? response.history : []);
         const container = document.getElementById('history-container');
         container.innerHTML = '';
-        if (history && history.length > 0) {
+
+        if (history.length > 0) {
             history.forEach(item => {
+                const safeAmount = escapeHtml(item.amount);
+                const safeStatus = item.status === 'completed' ? 'completed' : 'pending';
+                const statusText = safeStatus === 'completed' ? '✓ مكتملة' : '⏳ قيد المراجعة';
                 container.innerHTML += `
                     <div class="history-item">
-                        <span>${item.amount} USDT</span>
-                        <span class="status-${item.status}">${item.status === 'completed' ? '✓ مكتملة' : '⏳ قيد المراجعة'}</span>
+                        <span>${safeAmount} USDT</span>
+                        <span class="status-${safeStatus}">${statusText}</span>
                     </div>
                 `;
             });
