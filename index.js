@@ -183,4 +183,213 @@ app.get('/api/user', (req, res) => {
       success: true,
       balance: user.balance,
       last_claim: user.last_claim,
-      ads
+      ads_watched: user.ads_watched
+    });
+  });
+});
+
+app.post('/api/daily-checkin', (req, res) => {
+  const userId = normalizeUserId(req.body && req.body.userId);
+  if (!userId) {
+    return res.status(400).json({ success: false, message: 'معرف المستخدم مطلوب.' });
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  const rewardAmount = 0.0005;
+
+  ensureUserExists(userId, (ensureErr, user) => {
+    if (ensureErr) {
+      return res.status(500).json({ success: false, message: ensureErr.message });
+    }
+
+    if (now - user.last_claim < 86400) {
+      return res.json({ success: false, message: 'تم استلام المكافأة اليومية مسبقاً.' });
+    }
+
+    const nextBalance = round6(user.balance + rewardAmount);
+    db.run(
+      `UPDATE users SET balance = ?, last_claim = ? WHERE id = ?`,
+      [nextBalance, now, userId],
+      (updateErr) => {
+        if (updateErr) {
+          return res.status(500).json({ success: false, message: updateErr.message });
+        }
+        res.json({ success: true, reward: rewardAmount, balance: nextBalance });
+      }
+    );
+  });
+});
+
+app.post('/api/complete-ad', (req, res) => {
+  const userId = normalizeUserId(req.body && req.body.userId);
+  const isPromo = Boolean(req.body && req.body.isPromo);
+
+  if (!userId) {
+    return res.status(400).json({ success: false, message: 'معرف المستخدم مطلوب.' });
+  }
+
+  const rewardAmount = isPromo ? PROMO_AD_REWARD : REGULAR_AD_REWARD;
+
+  ensureUserExists(userId, (ensureErr, user) => {
+    if (ensureErr) {
+      return res.status(500).json({ success: false, message: ensureErr.message });
+    }
+
+    const nextBalance = round6(user.balance + rewardAmount);
+    const nextAdsWatched = user.ads_watched + 1;
+
+    db.run(
+      `UPDATE users SET balance = ?, ads_watched = ? WHERE id = ?`,
+      [nextBalance, nextAdsWatched, userId],
+      (updateErr) => {
+        if (updateErr) {
+          return res.status(500).json({ success: false, message: updateErr.message });
+        }
+        res.json({
+          success: true,
+          reward: rewardAmount,
+          balance: nextBalance,
+          ads_watched: nextAdsWatched
+        });
+      }
+    );
+  });
+});
+
+app.get('/api/channels', (req, res) => {
+  const userId = normalizeUserId(req.query.userId);
+  if (!userId) {
+    return res.status(400).json({ success: false, message: 'معرف المستخدم مطلوب.' });
+  }
+
+  db.all(
+    `SELECT id, url, package_key, duration_days, price, status, created_at, expires_at
+     FROM channels
+     WHERE user_id = ?
+     ORDER BY id DESC`,
+    [userId],
+    (err, rows) => {
+      if (err) {
+        return res.status(500).json({ success: false, message: err.message });
+      }
+      res.json({ success: true, channels: rows || [] });
+    }
+  );
+});
+
+app.post('/api/add-channel', (req, res) => {
+  const userId = normalizeUserId(req.body && req.body.userId);
+  const trimmedUrl = String((req.body && req.body.url) || '').trim();
+  const packageKey = Object.prototype.hasOwnProperty.call(PROMO_PACKAGES, req.body && req.body.packageKey)
+    ? req.body.packageKey
+    : '2_days';
+  const selectedPkg = PROMO_PACKAGES[packageKey];
+  const now = Math.floor(Date.now() / 1000);
+
+  if (!userId) {
+    return res.status(400).json({ success: false, message: 'معرف المستخدم مطلوب.' });
+  }
+  if (!trimmedUrl || !isValidHttpUrl(trimmedUrl)) {
+    return res.status(400).json({ success: false, message: 'يرجى إدخال رابط صحيح يبدأ بـ https:// أو http://' });
+  }
+
+  ensureUserExists(userId, (ensureErr) => {
+    if (ensureErr) {
+      return res.status(500).json({ success: false, message: ensureErr.message });
+    }
+
+    db.run(
+      `INSERT INTO channels (user_id, url, package_key, duration_days, price, status, created_at)
+       VALUES (?, ?, ?, ?, ?, 'pending', ?)`,
+      [userId, trimmedUrl, packageKey, selectedPkg.days, selectedPkg.price, now],
+      function (err) {
+        if (err) {
+          return res.status(500).json({ success: false, message: err.message });
+        }
+        res.json({
+          success: true,
+          id: this.lastID,
+          status: 'pending',
+          duration_days: selectedPkg.days,
+          price: selectedPkg.price
+        });
+      }
+    );
+  });
+});
+
+app.get('/api/withdraw-history', (req, res) => {
+  const userId = normalizeUserId(req.query.id);
+  if (!userId) {
+    return res.status(400).json({ success: false, message: 'معرف المستخدم مطلوب.' });
+  }
+
+  db.all(
+    `SELECT id, amount, wallet, status, created_at FROM withdrawals WHERE user_id = ? ORDER BY id DESC`,
+    [userId],
+    (err, rows) => {
+      if (err) {
+        return res.status(500).json({ success: false, message: err.message });
+      }
+      res.json({ success: true, history: rows || [] });
+    }
+  );
+});
+
+app.post('/api/withdraw', (req, res) => {
+  const userId = normalizeUserId(req.body && req.body.userId);
+  const numericAmount = round6(Number(req.body && req.body.amount));
+  const wallet = String((req.body && req.body.wallet) || '').trim();
+  const now = Math.floor(Date.now() / 1000);
+
+  if (!userId) {
+    return res.json({ success: false, message: 'معرف المستخدم مطلوب.' });
+  }
+  if (!wallet || wallet.length < 5) {
+    return res.json({ success: false, message: 'يرجى إدخال عنوان محفظة صحيح.' });
+  }
+  if (!Number.isFinite(numericAmount) || numericAmount < MIN_WITHDRAW_AMOUNT) {
+    return res.json({ success: false, message: `الحد الأدنى للسحب هو ${MIN_WITHDRAW_AMOUNT.toFixed(2)} USDT.` });
+  }
+
+  ensureUserExists(userId, (ensureErr, user) => {
+    if (ensureErr) {
+      return res.status(500).json({ success: false, message: ensureErr.message });
+    }
+
+    if (user.balance < numericAmount) {
+      return res.json({ success: false, message: 'الرصيد غير كافٍ.' });
+    }
+
+    const nextBalance = round6(user.balance - numericAmount);
+
+    db.serialize(() => {
+      db.run(`UPDATE users SET balance = ? WHERE id = ?`, [nextBalance, userId], (updateErr) => {
+        if (updateErr) {
+          return res.status(500).json({ success: false, message: updateErr.message });
+        }
+
+        db.run(
+          `INSERT INTO withdrawals (user_id, amount, wallet, status, created_at) VALUES (?, ?, ?, 'pending', ?)`,
+          [userId, numericAmount, wallet, now],
+          (insertErr) => {
+            if (insertErr) {
+              return res.status(500).json({ success: false, message: insertErr.message });
+            }
+            res.json({
+              success: true,
+              message: 'تم إرسال طلب السحب.',
+              balance: nextBalance
+            });
+          }
+        );
+      });
+    });
+  });
+});
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
